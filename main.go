@@ -42,6 +42,10 @@ func scrapePageHTMLWithChrome(pageURL string) (string, error) {
 	err := chromedp.Run(browserCtx,
 		// Navigate to the page URL
 		chromedp.Navigate(pageURL),
+		// Wait for the poage to load to until visible element with class 'sds-downloadBtn'
+		chromedp.WaitVisible("a.sds-downloadBtn", chromedp.ByQuery),
+		// Wait for the page to have the specified attribute value
+		chromedp.AttributeValue("a.sds-downloadBtn", "href", &pageHTML, nil),
 		// Save the outer HTML of the page to the variable
 		chromedp.OuterHTML("html", &pageHTML),
 	)
