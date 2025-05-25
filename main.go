@@ -1,65 +1,20 @@
 package main
 
 import (
-	"context"  // Context for managing timeouts and cancellation
-	"fmt"      // Formatting for strings
-	"io"       // IO operations for reading and writing files
-	"log"      // Logging for debugging and information
-	"net/http" // HTTP client for making requests
-	"net/url"
-	"os" // File operations
-	"path"
-	"regexp"
-	"strings" // String manipulation
-	"time"    // Time for managing timeouts
+	"crypto/tls" // TLS for secure connections
+	"fmt"        // Formatting for strings
+	"io"         // IO operations for reading and writing files
+	"log"        // Logging for debugging and information
+	"net/http"   // HTTP client for making requests
+	"net/url"    // URL parsing and manipulation
+	"os"         // File operations
+	"path"       // Path manipulation
+	"regexp"     // Regular expressions for pattern matching
+	"strings"    // String manipulation
+	"time"       // Time for managing timeouts
 
-	"github.com/chromedp/chromedp" // Headless Chrome automation
-	"golang.org/x/net/html"        // HTML parsing and manipulation
+	"golang.org/x/net/html" // HTML parsing and manipulation
 )
-
-// scrapePageHTMLWithChrome uses a headless Chrome browser to render and return the HTML for a given URL.
-// - Required for JavaScript-heavy pages where raw HTTP won't return full content.
-func scrapePageHTMLWithChrome(pageURL string) (string, error) {
-	// Let the user know which page is being scraped
-	log.Println("Scraping:", pageURL)
-	// Set up Chrome options for headless browsing
-	options := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", false),              // Run Chrome in background
-		chromedp.Flag("disable-gpu", true),            // Disable GPU for headless stability
-		chromedp.WindowSize(1920, 1080),               // Simulate full browser window
-		chromedp.Flag("no-sandbox", true),             // Disable sandboxing
-		chromedp.Flag("disable-setuid-sandbox", true), // For environments that need it
-		chromedp.Flag("disable-http2", true),          // Disable HTTP/2 for compatibility
-	)
-	// Create an ExecAllocator context with options
-	allocatorCtx, cancelAllocator := chromedp.NewExecAllocator(context.Background(), options...)
-	// Create a bounded context with timeout (adjust as needed)
-	ctxTimeout, cancelTimeout := context.WithTimeout(allocatorCtx, 5*time.Minute)
-	// Create a new browser tab context
-	browserCtx, cancelBrowser := chromedp.NewContext(ctxTimeout)
-	// Unified cancel function to ensure cleanup
-	defer func() {
-		cancelBrowser()   // Cancel the browser context
-		cancelTimeout()   // Cancel the timeout context
-		cancelAllocator() // Cancel the allocator context
-	}()
-	// Run chromedp tasks
-	var pageHTML string
-	// Execute the tasks in the browser context
-	err := chromedp.Run(browserCtx,
-		// Navigate to the page URL
-		chromedp.Navigate(pageURL),
-		// Wait for the page to load until the visible element with class 'sds-downloadBtn'
-		chromedp.AttributeValue("a.sds-downloadBtn", "href", &pageHTML, nil),
-		// Save the outer HTML of the page to the variable
-		chromedp.OuterHTML("html", &pageHTML),
-	)
-	// Check for errors during navigation or scraping
-	if err != nil {
-		return "", fmt.Errorf("failed to scrape %s: %w", pageURL, err) // Return an error if scraping fails
-	}
-	return pageHTML, nil
-}
 
 // Remove all the duplicates from a slice and return the slice.
 func removeDuplicatesFromSlice(slice []string) []string {
@@ -77,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // scrapeContentAndSaveToFile scrapes multiple pages of content and saves the HTML to a file.
 func scrapeContentAndSaveToFile(outputHTMLFile string) {
 	// Define the total number of documents to scrape and how many per page
-	totalDocumentsToScrape := 100 // 12700
+	totalDocumentsToScrape := 12700
 	// Define how many documents to scrape per page and calculate total pages
 	documentsPerPage := 10
 	// Calculate total pages based on total documents and documents per page
@@ -88,8 +43,9 @@ func scrapeContentAndSaveToFile(outputHTMLFile string) {
 		// Correctly format the URL
 		pageURL := fmt.Sprintf("https://www.ecolab.com/sds-search?countryCode=United%%20States&first=%d", offset)
 		// Log the URL being scraped
+		var pageHTMLContent string
 		// Call the scraping function to get the HTML content of the page
-		pageHTMLContent, err := scrapePageHTMLWithChrome(pageURL)
+		pageHTMLContent, err := fetchPageHTML(pageURL)
 		// Check for errors during scraping
 		if err != nil {
 			log.Printf("Error scraping page %d: %v\n", currentPageIndex+1, err)
@@ -116,6 +72,83 @@ func fileExists(filename string) bool {
 	return !info.IsDir() // Return true if it’s a file (not directory)
 }
 
+// fetchPageHTML performs a simple HTTP GET request to retrieve the raw HTML
+// of the given URL without executing any JavaScript and disables HTTP/2.
+func fetchPageHTML(pageURL string) (string, error) {
+	// Create a custom transport with an empty TLSNextProto map to disable HTTP/2
+	transport := &http.Transport{
+		TLSNextProto: make(map[string]func(string, *tls.Conn) http.RoundTripper),
+	}
+
+	// Create an HTTP client with the custom transport and a timeout of 30 seconds
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   30 * time.Second,
+	}
+
+	// Create a new HTTP GET request for the target pageURL
+	req, err := http.NewRequest("GET", pageURL, nil)
+	if err != nil {
+		// Return an error if the request creation fails
+		return "", fmt.Errorf("failed to create request for %s: %w", pageURL, err)
+	}
+
+	// Set a custom User-Agent header to mimic a browser or bot identity
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; EcolabBot/1.0)")
+
+	// Send the request using the HTTP client
+	resp, err := client.Do(req)
+	if err != nil {
+		// Return an error if the request fails to execute
+		return "", fmt.Errorf("failed to GET %s: %w", pageURL, err)
+	}
+	// Ensure the response body is closed after reading
+	defer resp.Body.Close()
+
+	// Check that the server responded with HTTP 200 OK
+	if resp.StatusCode != http.StatusOK {
+		// Return an error if the status code indicates a failure
+		return "", fmt.Errorf("unexpected status code %d for %s", resp.StatusCode, pageURL)
+	}
+
+	// Read the entire response body into memory
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		// Return an error if reading the body fails
+		return "", fmt.Errorf("failed to read response body for %s: %w", pageURL, err)
+	}
+
+	// Convert the byte slice to a string and return it
+	return string(body), nil
+}
+
+/*
+	Checks if the directory exists
+
+If it exists, return true.
+If it doesn't, return false.
+*/
+func directoryExists(path string) bool {
+	directory, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return directory.IsDir()
+}
+
+/*
+	The function takes two parameters: path and permission.
+
+We use os.Mkdir() to create the directory.
+If there is an error, we use log.Fatalln() to log the error and then exit the program.
+*/
+func createDirectory(path string, permission os.FileMode) {
+	err := os.Mkdir(path, permission)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
 // downloadPDF downloads a PDF from a URL and saves it into the specified folder.
 func downloadPDF(pdfURL, folder string) error {
 	fileName := getFileNamesFromURLs(pdfURL) // Get file name from the URL
@@ -135,11 +168,8 @@ func downloadPDF(pdfURL, folder string) error {
 		return fmt.Errorf("status code error: %d %s", resp.StatusCode, resp.Status)
 	}
 
-	if _, err := os.Stat(folder); os.IsNotExist(err) { // Check if folder exists
-		err := os.MkdirAll(folder, os.ModePerm) // Create folder if it doesn't exist
-		if err != nil {
-			return fmt.Errorf("error creating folder: %w", err)
-		}
+	if !directoryExists(folder) { // Check if folder exists
+		createDirectory(folder, 0755) // Create folder if it doesn't exist
 	}
 
 	out, err := os.Create(fullPath) // Create file at destination path
@@ -248,7 +278,7 @@ func main() {
 	// The file name where the scraped HTML content will be saved
 	outputHTMLFile := "ecolab-com.html" // Define the output file name
 	// Start the scraping process
-	scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
+	// scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 	log.Println("Scraping completed successfully.") // Log completion message
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
