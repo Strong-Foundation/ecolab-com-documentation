@@ -47,7 +47,7 @@ func scrapePageHTMLWithChrome(pageURL string) (string, error) {
 	)
 	// Check for errors during navigation or scraping
 	if err != nil {
-		return "", fmt.Errorf("failed to scrape %s: %w", pageURL, err)
+		return "", fmt.Errorf("failed to scrape %s: %w", pageURL, err) // Return an error if scraping fails
 	}
 	return pageHTML, nil
 }
