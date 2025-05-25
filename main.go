@@ -123,8 +123,7 @@ func fetchPageHTML(pageURL string) (string, error) {
 }
 
 /*
-	Checks if the directory exists
-
+Checks if the directory exists
 If it exists, return true.
 If it doesn't, return false.
 */
@@ -137,8 +136,7 @@ func directoryExists(path string) bool {
 }
 
 /*
-	The function takes two parameters: path and permission.
-
+The function takes two parameters: path and permission.
 We use os.Mkdir() to create the directory.
 If there is an error, we use log.Fatalln() to log the error and then exit the program.
 */
@@ -207,34 +205,44 @@ func appendByteToFile(filename string, data []byte) {
 	log.Println("Data appended successfully to", filename) // Log success message
 }
 
-// ExtractDownloadLinks parses the HTML and returns all .pdf hrefs from <a class="sds-downloadBtn">
-func ExtractDownloadLinks(htmlContent string) ([]string, error) {
+// extractDownloadLinks parses the HTML and returns all .pdf hrefs from <a class="sds-downloadBtn">
+func extractDownloadLinks(htmlContent string) ([]string, error) {
+	// Parse the HTML content using the html tokenizer
 	var links []string
-
+	// Create a new HTML tokenizer to parse the HTML content
 	tokenizer := html.NewTokenizer(strings.NewReader(htmlContent))
-
+	// Loop through the tokens in the HTML content
 	for {
+		// Get the next token from the tokenizer
 		tt := tokenizer.Next()
+		// Check the type of token
 		switch tt {
+		// Check if the token is an error
 		case html.ErrorToken:
 			return links, nil // End of document
-
 		case html.StartTagToken, html.SelfClosingTagToken:
 			token := tokenizer.Token()
 			if token.Data == "a" {
+				// Check if the token is an anchor tag
 				var href string
+				// Check if the token has attributes
 				var isDownloadBtn bool
-
+				// Check if the token has attributes
 				for _, attr := range token.Attr {
+					// Check if the attribute is class
 					if attr.Key == "class" && strings.Contains(attr.Val, "sds-downloadBtn") {
+						// Check if the class contains "sds-downloadBtn"
 						isDownloadBtn = true
 					}
+					// Check if the attribute is href
 					if attr.Key == "href" {
+						// Check if the href attribute is not empty
 						href = attr.Val
 					}
 				}
-
+				// Check if the link is a download button and ends with .pdf
 				if isDownloadBtn && strings.HasSuffix(strings.ToLower(href), ".pdf") {
+					// Append the link to the slice
 					links = append(links, href)
 				}
 			}
@@ -278,12 +286,12 @@ func main() {
 	// The file name where the scraped HTML content will be saved
 	outputHTMLFile := "ecolab-com.html" // Define the output file name
 	// Start the scraping process
-	// scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
+	scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 	log.Println("Scraping completed successfully.") // Log completion message
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
 	// Extract download links from the HTML content
-	downloadLinks, err := ExtractDownloadLinks(htmlContent) // Call the function to extract download links
+	downloadLinks, err := extractDownloadLinks(htmlContent) // Call the function to extract download links
 	if err != nil {
 		log.Fatalln("Error extracting download links:", err) // Log error if extraction fails
 	}
