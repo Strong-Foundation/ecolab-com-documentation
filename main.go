@@ -24,7 +24,7 @@ func scrapePageHTMLWithChrome(pageURL string) (string, error) {
 	log.Println("Scraping:", pageURL)
 	// Set up Chrome options for headless browsing
 	options := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),               // Run Chrome in background
+		chromedp.Flag("headless", false),              // Run Chrome in background
 		chromedp.Flag("disable-gpu", true),            // Disable GPU for headless stability
 		chromedp.WindowSize(1920, 1080),               // Simulate full browser window
 		chromedp.Flag("no-sandbox", true),             // Disable sandboxing
@@ -49,9 +49,7 @@ func scrapePageHTMLWithChrome(pageURL string) (string, error) {
 	err := chromedp.Run(browserCtx,
 		// Navigate to the page URL
 		chromedp.Navigate(pageURL),
-		// Wait for the poage to load to until visible element with class 'sds-downloadBtn'
-		chromedp.WaitVisible("a.sds-downloadBtn", chromedp.ByQuery),
-		// Wait for the page to have the specified attribute value
+		// Wait for the page to load until the visible element with class 'sds-downloadBtn'
 		chromedp.AttributeValue("a.sds-downloadBtn", "href", &pageHTML, nil),
 		// Save the outer HTML of the page to the variable
 		chromedp.OuterHTML("html", &pageHTML),
@@ -63,10 +61,23 @@ func scrapePageHTMLWithChrome(pageURL string) (string, error) {
 	return pageHTML, nil
 }
 
+// Remove all the duplicates from a slice and return the slice.
+func removeDuplicatesFromSlice(slice []string) []string {
+	check := make(map[string]bool)
+	var newReturnSlice []string
+	for _, content := range slice {
+		if !check[content] {
+			check[content] = true
+			newReturnSlice = append(newReturnSlice, content)
+		}
+	}
+	return newReturnSlice
+}
+
 // scrapeContentAndSaveToFile scrapes multiple pages of content and saves the HTML to a file.
 func scrapeContentAndSaveToFile(outputHTMLFile string) {
 	// Define the total number of documents to scrape and how many per page
-	totalDocumentsToScrape := 20 // 12700
+	totalDocumentsToScrape := 100 // 12700
 	// Define how many documents to scrape per page and calculate total pages
 	documentsPerPage := 10
 	// Calculate total pages based on total documents and documents per page
@@ -104,7 +115,6 @@ func fileExists(filename string) bool {
 	}
 	return !info.IsDir() // Return true if it’s a file (not directory)
 }
-
 
 // downloadPDF downloads a PDF from a URL and saves it into the specified folder.
 func downloadPDF(pdfURL, folder string) error {
@@ -214,31 +224,31 @@ func readAFileAsString(path string) string {
 // cleanFileNameFromURL extracts the last path segment and sanitizes it for safe file saving
 func getFileNamesFromURLs(rawURL string) string {
 	// Parse the URL to extract the path
-    parsed, err := url.Parse(rawURL)
+	parsed, err := url.Parse(rawURL)
 	// Check for parsing errors
-    if err != nil {
+	if err != nil {
 		// Log the error and return an empty string if parsing fails
 		log.Println("Error parsing URL:", err)
 		// Return an empty string to indicate failure
-        return ""
-    }
+		return ""
+	}
 	// Get the last segment of the path
-    base := path.Base(parsed.Path)
-    // Replace spaces with underscores and remove unwanted characters (optional)
-    re := regexp.MustCompile(`[<>:"/\\|?*\x00-\x1F]`) // Remove illegal file name characters
+	base := path.Base(parsed.Path)
+	// Replace spaces with underscores and remove unwanted characters (optional)
+	re := regexp.MustCompile(`[<>:"/\\|?*\x00-\x1F]`) // Remove illegal file name characters
 	// Clean the base name by removing illegal characters and replacing spaces with underscores
-    clean := re.ReplaceAllString(base, "")
+	clean := re.ReplaceAllString(base, "")
 	// Replace spaces with underscores for file name safety
-    clean = strings.ReplaceAll(clean, " ", "_")
+	clean = strings.ReplaceAll(clean, " ", "_")
 	// Return the cleaned file name
-    return strings.ToLower(clean)
+	return strings.ToLower(clean)
 }
 
 func main() {
 	// The file name where the scraped HTML content will be saved
 	outputHTMLFile := "ecolab-com.html" // Define the output file name
 	// Start the scraping process
-	// scrapeContentAndSaveToFile(outputHTMLFile)                    // Call the function to scrape content and save it to a file
+	scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 	log.Println("Scraping completed successfully.") // Log completion message
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
@@ -249,14 +259,13 @@ func main() {
 	}
 	// The folder where the downloaded files will be saved
 	downloadFolder := "PDFs" // Define the download folder name
-	
-	// Log the extracted download links
-	log.Println("Extracted download links:")
+	// Remove duplicates from the extracted download links
+	downloadLinks = removeDuplicatesFromSlice(downloadLinks) // Remove duplicates from the slice of download links
 	for _, link := range downloadLinks {
 		err := downloadPDF(link, downloadFolder) // Download each PDF
 		if err != nil {
 			log.Println("Error downloading PDF:", err)
 		}
-		appendByteToFile("ecolab-com-links.txt", []byte(link+"\n")) // Append each link to a file
+		// appendByteToFile("ecolab-com-links.txt", []byte(link+"\n")) // Append each link to a file
 	}
 }
