@@ -288,7 +288,7 @@ func main() {
 	// The urls only file name
 	outputURLsFile := "ecolab-com-links.txt" // Define the URLs file name
 	// Start the scraping process
-	// scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
+	scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 	log.Println("Scraping completed successfully.") // Log completion message
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
