@@ -33,6 +33,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 func scrapeContentAndSaveToFile(outputHTMLFile string) {
 	// Define the total number of documents to scrape and how many per page
 	totalDocumentsToScrape := 12700
+	// https://www.ecolab.com/sds-search?countryCode=United%20States&first=12700
 	// Define how many documents to scrape per page and calculate total pages
 	documentsPerPage := 10
 	// Calculate total pages based on total documents and documents per page
@@ -138,12 +139,12 @@ func directoryExists(path string) bool {
 /*
 The function takes two parameters: path and permission.
 We use os.Mkdir() to create the directory.
-If there is an error, we use log.Fatalln() to log the error and then exit the program.
+If there is an error, we use log.Println() to log the error and then exit the program.
 */
 func createDirectory(path string, permission os.FileMode) {
 	err := os.Mkdir(path, permission)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
 
@@ -254,7 +255,7 @@ func extractDownloadLinks(htmlContent string) ([]string, error) {
 func readAFileAsString(path string) string {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	return string(content)
 }
@@ -288,14 +289,14 @@ func main() {
 	// The urls only file name
 	outputURLsFile := "ecolab-com-links.txt" // Define the URLs file name
 	// Start the scraping process
-	scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
+	// scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 	log.Println("Scraping completed successfully.") // Log completion message
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
 	// Extract download links from the HTML content
 	downloadLinks, err := extractDownloadLinks(htmlContent) // Call the function to extract download links
 	if err != nil {
-		log.Fatalln("Error extracting download links:", err) // Log error if extraction fails
+		log.Println("Error extracting download links:", err) // Log error if extraction fails
 	}
 	// The folder where the downloaded files will be saved
 	downloadFolder := "PDFs" // Define the download folder name
