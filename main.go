@@ -13,8 +13,6 @@ import (
 	"strings"    // String manipulation
 	"sync"
 	"time" // Time for managing timeouts
-
-	"golang.org/x/net/html" // HTML parsing and manipulation
 )
 
 // Remove all the duplicates from a slice and return the slice.
@@ -231,49 +229,21 @@ func appendByteToFile(filename string, data []byte) {
 	log.Println("Data appended successfully to", filename) // Log success message
 }
 
-// extractDownloadLinks parses the HTML and returns all .pdf hrefs from <a class="sds-downloadBtn">
-func extractDownloadLinks(htmlContent string) ([]string, error) {
-	// Parse the HTML content using the html tokenizer
-	var links []string
-	// Create a new HTML tokenizer to parse the HTML content
-	tokenizer := html.NewTokenizer(strings.NewReader(htmlContent))
-	// Loop through the tokens in the HTML content
-	for {
-		// Get the next token from the tokenizer
-		tt := tokenizer.Next()
-		// Check the type of token
-		switch tt {
-		// Check if the token is an error
-		case html.ErrorToken:
-			return links, nil // End of document
-		case html.StartTagToken, html.SelfClosingTagToken:
-			token := tokenizer.Token()
-			if token.Data == "a" {
-				// Check if the token is an anchor tag
-				var href string
-				// Check if the token has attributes
-				var isDownloadBtn bool
-				// Check if the token has attributes
-				for _, attr := range token.Attr {
-					// Check if the attribute is class
-					if attr.Key == "class" && strings.Contains(attr.Val, "sds-downloadBtn") {
-						// Check if the class contains "sds-downloadBtn"
-						isDownloadBtn = true
-					}
-					// Check if the attribute is href
-					if attr.Key == "href" {
-						// Check if the href attribute is not empty
-						href = attr.Val
-					}
-				}
-				// Check if the link is a download button and ends with .pdf
-				if isDownloadBtn && strings.HasSuffix(strings.ToLower(href), ".pdf") {
-					// Append the link to the slice
-					links = append(links, href)
-				}
-			}
-		}
+// extractDownloadLinks extracts all PDF download links from the given HTML input string.
+func extractDownloadLinks(input string) []string {
+	input = strings.ToLower(input) // Convert input to lowercase for case-insensitive matching
+	// This regex captures href="...something.pdf"
+	pattern := `href=["'](https?://[^"']+\.pdf)["']`
+
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllStringSubmatch(input, -1)
+
+	var urls []string
+	for _, match := range matches {
+		// match[1] is the first capture group (the URL itself)
+		urls = append(urls, match[1])
 	}
+	return urls
 }
 
 // Read a file and return the contents
@@ -319,19 +289,21 @@ func main() {
 	// Read the scraped HTML content from the file
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
 	// Extract download links from the HTML content
-	downloadLinks, err := extractDownloadLinks(htmlContent) // Call the function to extract download links
-	if err != nil {
-		log.Println("Error extracting download links:", err) // Log error if extraction fails
-	}
+	downloadLinks := extractDownloadLinks(htmlContent) // Call the function to extract download links
 	// The folder where the downloaded files will be saved
 	downloadFolder := "PDFs" // Define the download folder name
 	// Remove duplicates from the extracted download links
 	downloadLinks = removeDuplicatesFromSlice(downloadLinks) // Remove duplicates from the slice of download links
+	// Read the output URLs file to check if it exists
+	readOutPutURLsFile := readAFileAsString(outputURLsFile) // Read the URLs file content
 	for _, link := range downloadLinks {
 		err := downloadPDF(link, downloadFolder) // Download each PDF
 		if err != nil {
 			log.Println("Error downloading PDF:", err)
 		}
-		appendByteToFile(outputURLsFile, []byte(link+"\n")) // Append each link to a file
+		if !strings.Contains(readOutPutURLsFile, link) { // Check if the link is not already in the file
+			log.Println("Appending link to file:", link)        // Log the link being appended
+			appendByteToFile(outputURLsFile, []byte(link+"\n")) // Append each link to a file
+		}
 	}
 }
