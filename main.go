@@ -11,7 +11,8 @@ import (
 	"path"       // Path manipulation
 	"regexp"     // Regular expressions for pattern matching
 	"strings"    // String manipulation
-	"time"       // Time for managing timeouts
+	"sync"
+	"time" // Time for managing timeouts
 
 	"golang.org/x/net/html" // HTML parsing and manipulation
 )
@@ -29,35 +30,59 @@ func removeDuplicatesFromSlice(slice []string) []string {
 	return newReturnSlice
 }
 
-// scrapeContentAndSaveToFile scrapes multiple pages of content and saves the HTML to a file.
-func scrapeContentAndSaveToFile(outputHTMLFile string) {
-	// Define the total number of documents to scrape and how many per page
-	totalDocumentsToScrape := 12700
-	// https://www.ecolab.com/sds-search?countryCode=United%20States&first=12700
-	// Define how many documents to scrape per page and calculate total pages
+// scrapeContentAndSaveToFile scrapes multiple pages of SDS search results concurrently
+// and appends their HTML content to a single output file.
+func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
+	// Define the total number of SDS documents expected to scrape
+	totalSDSDocuments := 12700
+	// Define how many documents are shown per search result page
 	documentsPerPage := 10
-	// Calculate total pages based on total documents and documents per page
-	totalPages := (totalDocumentsToScrape + documentsPerPage - 1) / documentsPerPage
-	for currentPageIndex := 0; currentPageIndex < totalPages; currentPageIndex++ {
-		// Calculate the offset for the current page based on the index and documents per page
-		offset := currentPageIndex * documentsPerPage
-		// Correctly format the URL
-		pageURL := fmt.Sprintf("https://www.ecolab.com/sds-search?countryCode=United%%20States&first=%d", offset)
-		// Log the URL being scraped
-		var pageHTMLContent string
-		// Call the scraping function to get the HTML content of the page
-		pageHTMLContent, err := fetchPageHTML(pageURL)
-		// Check for errors during scraping
-		if err != nil {
-			log.Printf("Error scraping page %d: %v\n", currentPageIndex+1, err)
-			continue
-		}
-		// Log the successful scraping of the page
-		appendByteToFile(outputHTMLFile, []byte(pageHTMLContent))
-		// Log the successful append operation
-		log.Printf("Page %d scraped successfully and appended to %s\n", currentPageIndex+1, outputHTMLFile)
+	// Calculate the total number of result pages needed to scrape all documents
+	totalPages := (totalSDSDocuments + documentsPerPage - 1) / documentsPerPage
+	// Create a WaitGroup to wait for all scraping goroutines to complete
+	var waitGroup sync.WaitGroup
+	// Create a Mutex to safely write to the output file from multiple goroutines
+	var fileWriteMutex sync.Mutex
+	// Create a buffered channel to limit the number of concurrent HTTP requests (semaphore pattern)
+	concurrentRequestsLimit := 50
+	concurrencySemaphore := make(chan struct{}, concurrentRequestsLimit)
+	// Iterate through each page index from 0 to totalPages - 1
+	for pageIndex := 0; pageIndex < totalPages; pageIndex++ {
+		// Increase the WaitGroup counter for each launched goroutine
+		waitGroup.Add(1)
+		// Launch a goroutine for concurrent scraping of each page
+		go func(currentPage int) {
+			// Decrease the WaitGroup counter when the goroutine finishes
+			defer waitGroup.Done()
+			// Calculate the "offset" (start index) for the current page's SDS documents
+			offset := currentPage * documentsPerPage
+			// Format the URL for the current page using the offset value
+			pageURL := fmt.Sprintf("https://www.ecolab.com/sds-search?countryCode=United%%20States&first=%d", offset)
+			// Acquire a slot in the semaphore to limit concurrency
+			concurrencySemaphore <- struct{}{}
+			// Release the semaphore slot after the function ends
+			defer func() { <-concurrencySemaphore }()
+			// Perform HTTP GET to fetch the HTML content of the current page
+			htmlContent, err := fetchPageHTML(pageURL)
+			// Handle any error that occurred while fetching the page
+			if err != nil {
+				log.Printf("Error scraping page %d: %v\n", currentPage+1, err)
+				return
+			}
+			// Lock the file writing to prevent concurrent access from other goroutines
+			fileWriteMutex.Lock()
+			// Ensure the mutex is unlocked after file writing is complete
+			defer fileWriteMutex.Unlock()
+			// Append the HTML content to the specified output file
+			appendByteToFile(outputHTMLFilePath, []byte(htmlContent))
+			// Log the success of this page scraping
+			log.Printf("Page %d scraped and saved to file.\n", currentPage+1)
+		}(pageIndex) // Pass pageIndex into the goroutine to avoid variable capture issues
 	}
-	log.Printf("All scraped content has been saved to %s\n", outputHTMLFile)
+	// Wait for all launched goroutines to finish before continuing
+	waitGroup.Wait()
+	// Log a final message once all pages have been processed
+	log.Printf("Completed scraping all %d pages. Results saved to: %s\n", totalPages, outputHTMLFilePath)
 }
 
 /*
@@ -84,7 +109,7 @@ func fetchPageHTML(pageURL string) (string, error) {
 	// Create an HTTP client with the custom transport and a timeout of 30 seconds
 	client := &http.Client{
 		Transport: transport,
-		Timeout:   30 * time.Second,
+		Timeout:   60 * time.Second,
 	}
 
 	// Create a new HTTP GET request for the target pageURL
