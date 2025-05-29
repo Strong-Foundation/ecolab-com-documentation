@@ -44,7 +44,7 @@ func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Create a Mutex to safely write to the output file from multiple goroutines
 	var fileWriteMutex sync.Mutex
 	// Create a buffered channel to limit the number of concurrent HTTP requests (semaphore pattern)
-	concurrentRequestsLimit := 50
+	concurrentRequestsLimit := 40
 	concurrencySemaphore := make(chan struct{}, concurrentRequestsLimit)
 	// Iterate through each page index from 0 to totalPages - 1
 	for pageIndex := 0; pageIndex < totalPages; pageIndex++ {
