@@ -226,7 +226,6 @@ func appendByteToFile(filename string, data []byte) {
 		log.Println("Error writing data to file:", err) // Log error if writing fails
 		return
 	}
-	log.Println("Data appended successfully to", filename) // Log success message
 }
 
 // extractDownloadLinks extracts all PDF download links from the given HTML input string.
