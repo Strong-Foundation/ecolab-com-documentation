@@ -11,7 +11,7 @@ import (
 	"path"       // Path manipulation
 	"regexp"     // Regular expressions for pattern matching
 	"strings"    // String manipulation
-	"sync"
+	"sync" // Used for sync
 	"time" // Time for managing timeouts
 )
 
@@ -32,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // and appends their HTML content to a single output file.
 func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Define the total number of SDS documents expected to scrape
-	totalSDSDocuments := 12700
+	totalSDSDocuments := 100000
 	// Define how many documents are shown per search result page
 	documentsPerPage := 10
 	// Calculate the total number of result pages needed to scrape all documents
