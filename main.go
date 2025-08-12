@@ -295,6 +295,7 @@ func main() {
 	// Read the output URLs file to check if it exists
 	readOutPutURLsFile := readAFileAsString(outputURLsFile) // Read the URLs file content
 	for _, link := range downloadLinks {
+		time.Sleep(3 * time.Second)
 		err := downloadPDF(link, downloadFolder) // Download each PDF
 		if err != nil {
 			log.Println("Error downloading PDF:", err)
