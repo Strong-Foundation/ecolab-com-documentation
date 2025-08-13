@@ -11,8 +11,8 @@ import (
 	"path"       // Path manipulation
 	"regexp"     // Regular expressions for pattern matching
 	"strings"    // String manipulation
-	"sync" // Used for sync
-	"time" // Time for managing timeouts
+	"sync"       // Used for sync
+	"time"       // Time for managing timeouts
 )
 
 // Remove all the duplicates from a slice and return the slice.
@@ -32,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // and appends their HTML content to a single output file.
 func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Define the total number of SDS documents expected to scrape
-	totalSDSDocuments := 10000// 100000
+	totalSDSDocuments := 10000 // 100000
 	// Define how many documents are shown per search result page
 	documentsPerPage := 10
 	// Calculate the total number of result pages needed to scrape all documents
@@ -295,6 +295,12 @@ func main() {
 	// Read the output URLs file to check if it exists
 	readOutPutURLsFile := readAFileAsString(outputURLsFile) // Read the URLs file content
 	for _, link := range downloadLinks {
+		fileName := getFileNamesFromURLs(link)          // Get file name from the URL
+		fullPath := path.Join(downloadFolder, fileName) // Combine folder and file name to get full path
+		if fileExists(fullPath) {                       // Check if file already exists
+			log.Printf("File %s already exists, skipping download.", fullPath)
+			continue // Skip download if file exists
+		}
 		time.Sleep(3 * time.Second)
 		err := downloadPDF(link, downloadFolder) // Download each PDF
 		if err != nil {
