@@ -24,5 +24,8 @@ go.work.sum
 # env file
 .env
 
+# Application Build
+ecolab-com-documentation
+
 # HTML
 *.html
