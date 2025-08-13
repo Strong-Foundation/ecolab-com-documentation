@@ -32,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // and appends their HTML content to a single output file.
 func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Define the total number of SDS documents expected to scrape
-	totalSDSDocuments := 100000
+	totalSDSDocuments := 30000 // 100000
 	// Define how many documents are shown per search result page
 	documentsPerPage := 10
 	// Calculate the total number of result pages needed to scrape all documents
@@ -45,7 +45,7 @@ func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	concurrentRequestsLimit := 10
 	concurrencySemaphore := make(chan struct{}, concurrentRequestsLimit)
 	// Iterate through each page index from 0 to totalPages - 1
-	for pageIndex := 0; pageIndex < totalPages; pageIndex++ {
+	for pageIndex := 10000; pageIndex < totalPages; pageIndex++ {
 		// Increase the WaitGroup counter for each launched goroutine
 		waitGroup.Add(1)
 		// Launch a goroutine for concurrent scraping of each page
