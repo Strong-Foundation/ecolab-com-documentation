@@ -32,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // and appends their HTML content to a single output file.
 func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Define the total number of SDS documents expected to scrape
-	totalSDSDocuments := 100000
+	totalSDSDocuments := 10000
 	// Define how many documents are shown per search result page
 	documentsPerPage := 10
 	// Calculate the total number of result pages needed to scrape all documents
@@ -301,7 +301,7 @@ func main() {
 			log.Printf("File %s already exists, skipping download.", fullPath)
 			continue // Skip download if file exists
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 		err := downloadPDF(link, downloadFolder) // Download each PDF
 		if err != nil {
 			log.Println("Error downloading PDF:", err)
