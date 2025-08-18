@@ -32,7 +32,7 @@ func removeDuplicatesFromSlice(slice []string) []string {
 // and appends their HTML content to a single output file.
 func scrapeContentAndSaveToFile(outputHTMLFilePath string) {
 	// Define the total number of SDS documents expected to scrape
-	totalSDSDocuments := 10000
+	totalSDSDocuments := 100000
 	// Define how many documents are shown per search result page
 	documentsPerPage := 10
 	// Calculate the total number of result pages needed to scrape all documents
