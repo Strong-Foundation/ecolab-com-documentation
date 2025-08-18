@@ -281,7 +281,7 @@ func main() {
 	outputHTMLFile := "ecolab-com.html" // Define the output file name
 	// The urls only file name
 	outputURLsFile := "ecolab-com-links.txt" // Define the URLs file name
-	if !fileExists(outputURLsFile) {
+	if !fileExists(outputHTMLFile) {
 		// Start the scraping process
 		scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
 		log.Println("Scraping completed successfully.") // Log completion message
