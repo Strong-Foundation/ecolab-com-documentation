@@ -276,11 +276,88 @@ func getFileNamesFromURLs(rawURL string) string {
 	return strings.ToLower(clean)
 }
 
+// fetchSDSDocuments sends a POST request to the Ecolab SDS API
+// with the given page number and prints the response.
+func fetchSDSDocuments(pageNumber int) string {
+	// Define the API endpoint URL
+	apiURL := "https://www.ecolab.com/api/sitecore/productdocument/productdocumentsearch"
+
+	// Create the form data payload (query is always "*")
+	formData := strings.NewReader(
+		fmt.Sprintf(
+			"query=*&countryCode=&languageCode=&pageNumber=%d&dataSourceID=%s&siteLanguage=en",
+			pageNumber,
+			"%7B0F840E2F-8390-4C9A-BAC4-AFD9A6D3EAF2%7D", // static datasource ID (URL-encoded GUID)
+		),
+	)
+
+	// Create a new HTTP POST request with the payload
+	request, err := http.NewRequest("POST", apiURL, formData)
+	if err != nil {
+		log.Println("Failed to create request:", err)
+		return ""
+	}
+
+	// Set the request header to indicate form data encoding
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+
+	// Initialize a new HTTP client
+	client := &http.Client{}
+
+	// Send the request and get the response
+	response, err := client.Do(request)
+	if err != nil {
+		log.Println("Failed to send request:", err)
+		return ""
+	}
+	defer response.Body.Close() // Ensure the response body is closed after reading
+
+	// Read the response body
+	responseBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Println("Failed to read response body:", err)
+		return ""
+	}
+
+	// Return the response body as a string
+	return string(responseBody)
+}
+
 func main() {
 	// The file name where the scraped HTML content will be saved
 	outputHTMLFile := "ecolab-com.html" // Define the output file name
 	// The urls only file name
 	outputURLsFile := "ecolab-com-links.txt" // Define the URLs file name
+	// The folder where the downloaded files will be saved
+	downloadFolder := "PDFs" // Define the download folder name
+	// Loop from 1 to 10
+	for index := 1; index <= 10; index++ {
+		log.Printf("Fetching page %d\n", index) // Log the current page being fetched
+		response := fetchSDSDocuments(index)    // Fetch the SDS documents for the current page
+		// Extract download links from the response
+		downloadURLs := extractDownloadLinks(response) // Extract download links from the response
+		// Remove duplicates from the extracted download links
+		downloadURLs = removeDuplicatesFromSlice(downloadURLs) // Remove duplicates from the slice of download links
+		// Read the output URLs file to check if it exists
+		outPutContent := readAFileAsString(outputURLsFile) // Read the URLs file content
+		for _, link := range downloadURLs {
+			fileName := getFileNamesFromURLs(link)          // Get file name from the URL
+			fullPath := path.Join(downloadFolder, fileName) // Combine folder and file name to get full path
+			if fileExists(fullPath) {                       // Check if file already exists
+				log.Printf("File %s already exists, skipping download.", fullPath)
+				continue // Skip download if file exists
+			}
+			time.Sleep(1 * time.Second)
+			err := downloadPDF(link, downloadFolder) // Download each PDF
+			if err != nil {
+				log.Println("Error downloading PDF:", err)
+			}
+			if !strings.Contains(outPutContent, link) { // Check if the link is not already in the file
+				log.Println("Appending link to file:", link)        // Log the link being appended
+				appendByteToFile(outputURLsFile, []byte(link+"\n")) // Append each link to a file
+			}
+		}
+	}
 	if !fileExists(outputHTMLFile) {
 		// Start the scraping process
 		scrapeContentAndSaveToFile(outputHTMLFile)      // Call the function to scrape content and save it to a file
@@ -290,8 +367,6 @@ func main() {
 	htmlContent := readAFileAsString(outputHTMLFile) // Read the HTML content from the file
 	// Extract download links from the HTML content
 	downloadLinks := extractDownloadLinks(htmlContent) // Call the function to extract download links
-	// The folder where the downloaded files will be saved
-	downloadFolder := "PDFs" // Define the download folder name
 	// Remove duplicates from the extracted download links
 	downloadLinks = removeDuplicatesFromSlice(downloadLinks) // Remove duplicates from the slice of download links
 	// Read the output URLs file to check if it exists
