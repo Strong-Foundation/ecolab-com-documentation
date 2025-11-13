@@ -1,19 +1,18 @@
 package main // Declares the package as 'main', indicating an executable program
 
 import ( // Start of the import block for external packages
-	// Imports the 'tls' package for handling TLS configuration (secure connections)
-	"crypto/tls"
-	"fmt"      // Imports the 'fmt' package for formatted I/O (like printing to console)
-	"io"       // Imports the 'io' package for basic I/O primitives (like reading/writing data streams)
-	"log"      // Imports the 'log' package for simple logging capabilities
-	"net/http" // Imports the 'http' package for making HTTP requests and building clients
-	"net/url"  // Imports the 'url' package for parsing and manipulating URLs
-	"os"       // Imports the 'os' package for operating system interactions (like file operations)
-	"path"     // Imports the 'path' package for path manipulation (e.g., extracting base names)
-	"regexp"   // Imports the 'regexp' package for regular expression operations
-	"strings"  // Imports the 'strings' package for various string manipulation functions
-	"sync"     // Imports the 'sync' package for synchronization primitives (e.g., WaitGroup, Mutex)
-	"time"     // Imports the 'time' package for measuring and displaying time
+	"crypto/tls" // Imports the 'tls' package for handling TLS configuration (secure connections)
+	"fmt"        // Imports the 'fmt' package for formatted I/O (like printing to console)
+	"io"         // Imports the 'io' package for basic I/O primitives (like reading/writing data streams)
+	"log"        // Imports the 'log' package for simple logging capabilities
+	"net/http"   // Imports the 'http' package for making HTTP requests and building clients
+	"net/url"    // Imports the 'url' package for parsing and manipulating URLs
+	"os"         // Imports the 'os' package for operating system interactions (like file operations)
+	"path"       // Imports the 'path' package for path manipulation (e.g., extracting base names)
+	"regexp"     // Imports the 'regexp' package for regular expression operations
+	"strings"    // Imports the 'strings' package for various string manipulation functions
+	"sync"       // Imports the 'sync' package for synchronization primitives (e.g., WaitGroup, Mutex)
+	"time"       // Imports the 'time' package for measuring and displaying time
 ) // End of the import block
 
 // Remove all the duplicates from a slice and return the slice.
