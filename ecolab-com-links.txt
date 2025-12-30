@@ -20190,3 +20190,8 @@ https://assets.pim.ecolab.com/media/Original/1/Mouse Snap Trap PR_Label_EN_FR.pd
 https://assets.pim.ecolab.com/media/Original/1/Trap Protectors_Label_EN_FR.pdf
 https://assets.pim.ecolab.com/media/Original/1/Cellular Gateway (multiTech conduit)_Label_EN_FR.pdf
 https://assets.pim.ecolab.com/media/Original/1/Mouse Bait_Label_EN_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10437/BioBUGS SDS NZ.pdf
+https://assets.pim.ecolab.com/media/Original/10437/BioBUGS Label NZ.pdf
+https://assets.pim.ecolab.com/media/Original/10000/Astro Aerosol Residual Insecticide SDS NZ.pdf
+https://assets.pim.ecolab.com/media/Original/10437/BioFOAM+FOG LABEL NZ.pdf
+https://assets.pim.ecolab.com/media/Original/10437/BioFOAM+FOG SDS NZ.pdf
