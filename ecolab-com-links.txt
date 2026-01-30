@@ -20216,3 +20216,5 @@ https://assets.pim.ecolab.com/media/Original/10437/BioFOAM%2BFOG+SDS+NZ.pdf
 https://assets.pim.ecolab.com/media/Original/10437/BioFOAM%2BFOG+LABEL+NZ.pdf
 https://assets.pim.ecolab.com/media/Original/10481/Pyganic SDS AU.pdf
 https://assets.pim.ecolab.com/media/Original/10481/Pyganic Label AU.pdf
+https://assets.pim.ecolab.com/media/Original/10481/Spinogel Roach SDS AU.pdf
+https://assets.pim.ecolab.com/media/Original/10481/Spinogel Roach Label AU.pdf
