@@ -20226,3 +20226,7 @@ https://assets.pim.ecolab.com/media/Original/10482/Ekomille_Label_FR_BE.pdf
 https://assets.pim.ecolab.com/media/Original/10482/Advion Mouche Granule_SDS_FR_BE.pdf
 https://assets.pim.ecolab.com/media/Original/10482/Spinout 133 SC Insecticide SDS AU.pdf
 https://assets.pim.ecolab.com/media/Original/10482/Spinout 133 SC Insecticide Label AU.pdf
+https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_SDS_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_SDS_FR_BE.pdf
+https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_Label_FR_BE.pdf
