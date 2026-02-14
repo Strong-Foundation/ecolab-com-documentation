@@ -20230,3 +20230,6 @@ https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_SDS
 https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_Label_FR_FR.pdf
 https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_SDS_FR_BE.pdf
 https://assets.pim.ecolab.com/media/Original/10482/Recharge Piege Drosophila_Label_FR_BE.pdf
+https://assets.pim.ecolab.com/media/Original/10485/Mimetic_Label_EN_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10482/NextGen Fly Catcher SDS AU.pdf
+https://assets.pim.ecolab.com/media/Original/10482/Ekomille_Label_FR_FR.pdf
