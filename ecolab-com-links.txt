@@ -20243,3 +20243,4 @@ https://assets.pim.ecolab.com/media/Original/1/Brossol N 0,5M_Label_BE_FR.pdf
 https://assets.pim.ecolab.com/media/Original/1/Xlure Plodia Ephestia_Label_FR_FR.pdf
 https://assets.pim.ecolab.com/media/Original/10486/Dust to Dust SDS NZ.pdf
 https://assets.pim.ecolab.com/media/Original/10486/Dust to Dust Label NZ.pdf
+https://assets.pim.ecolab.com/media/Original/1/Pheromone Teigne Tineola_Label_FR_FR.pdf
