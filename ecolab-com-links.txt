@@ -20244,3 +20244,18 @@ https://assets.pim.ecolab.com/media/Original/1/Xlure Plodia Ephestia_Label_FR_FR
 https://assets.pim.ecolab.com/media/Original/10486/Dust to Dust SDS NZ.pdf
 https://assets.pim.ecolab.com/media/Original/10486/Dust to Dust Label NZ.pdf
 https://assets.pim.ecolab.com/media/Original/1/Pheromone Teigne Tineola_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Caps Rats_SDS_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Caps Rats_Label_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Rechage Green_SDS_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Recharge Green_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Rechage Yellow_SDS_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Recharge Yellow_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Bloc_SDS_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Bloc_Label_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10487/Attractif Invite Caps Rats_SDS_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10487/Attractif Invite Caps Rats_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Rechage Blue_SDS_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Dismate Recharge Blue_Label_FR_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Caps Souris_SDS_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10488/Attractif Invite Caps Souris_Label_BE_FR.pdf
+https://assets.pim.ecolab.com/media/Original/10487/Attractif Invite Bloc_SDS_FR_FR.pdf
